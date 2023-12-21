@@ -2,6 +2,7 @@ import React from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { SendSOLToRandomAddress } from '@/components/sendLamports';
 import { HelloWorld } from '@/components/callOwnProgram';
+import { AnchorProvider } from '@project-serum/anchor';
 
 const IndexPage: React.FC = () => {
     return (
