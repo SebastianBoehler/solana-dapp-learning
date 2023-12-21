@@ -17,7 +17,7 @@ mod hello_world {
         Ok(())
     }
 
-    pub fn anotherFunc(ctx: Context<Hello>) -> Result<()> {
+    pub fn another_func(ctx: Context<Hello>) -> Result<()> {
         msg!("Inside another Func");
         Ok(())
     }
