@@ -1,33 +1,39 @@
 import { useConnection, useWallet, useAnchorWallet } from "@solana/wallet-adapter-react";
 import React, { FC, useCallback } from "react";
-import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
-import { Keypair, SystemProgram, Transaction, TransactionInstruction, PublicKey } from '@solana/web3.js';
-import config from "@/config";
+import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
 import { getProgram } from "@/hooks/anchor";
-const pubkey = config.programId
-
-const keys = [
-    { pubkey, isSigner: false, isWritable: false },
-]
+import * as anchor from '@project-serum/anchor'
+import { Keypair } from "@solana/web3.js";
+const { BN } = anchor
 
 export const HelloWorld: FC = () => {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
     const wallet = useAnchorWallet()
 
-    console.log('inside own program')
-
     const callProgram = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
         if (!wallet) throw new WalletNotConnectedError();
 
         const program = await getProgram(connection, wallet)
-
-        const txHash = await program.methods.hello().rpc()
-        console.log({ txHash })
+        //@ts-ignore
+        window.program = program
 
         const txHash2 = await program.methods.anotherFunc().rpc()
-        console.log({ txHash2 })
+        console.log('another_func called', { txHash2 })
+
+        const increase = await program.methods
+            .increaseCounter(new BN(32, undefined, "le"))
+            .accounts({
+                set: Keypair.generate().publicKey,
+                signer: publicKey,
+                systemProgram: '11111111111111111111111111111111' //anchor.web3.SystemProgram.programId,
+            })
+            .signers([])
+            .rpc()
+
+
+        console.log('increaseCounter called', { increase })
 
     }, [publicKey, sendTransaction, connection])
 
