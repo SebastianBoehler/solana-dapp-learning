@@ -3,7 +3,7 @@ import React, { FC, useCallback } from "react";
 import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
 import { getProgram } from "@/hooks/anchor";
 import * as anchor from '@project-serum/anchor'
-import { Keypair } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 const { BN } = anchor
 
 export const HelloWorld: FC = () => {
@@ -16,30 +16,44 @@ export const HelloWorld: FC = () => {
         if (!wallet) throw new WalletNotConnectedError();
 
         const program = await getProgram(connection, wallet)
-        //@ts-ignore
-        window.program = program
+        const counterKey = Keypair.generate().publicKey
 
-        const txHash2 = await program.methods.anotherFunc().rpc()
-        console.log('another_func called', { txHash2 })
-
-        const increase = await program.methods
-            .increaseCounter(new BN(32, undefined, "le"))
+        const init = await program.methods
+            .initalize()
             .accounts({
-                set: Keypair.generate().publicKey,
-                signer: publicKey,
+                set: counterKey,
+                user: publicKey,
                 systemProgram: '11111111111111111111111111111111' //anchor.web3.SystemProgram.programId,
             })
-            .signers([])
             .rpc()
+            .catch((err) => {
+                console.log('err', err)
+            })
 
+        console.log('initalizeAcc called', { init })
 
+        //works
+        const increase = await program.methods
+            .increaseCounter(new BN(2, undefined, "le"))
+            .accounts({
+                set: new PublicKey('6uzQe1NzrZ7NmeM9qz5pkYD8ViKeobmdM5VAPaV6pBHB'),
+            })
+            .rpc()
         console.log('increaseCounter called', { increase })
+
+        const decrease = await program.methods
+            .decreaseCounter(new BN(6, undefined, "le"))
+            .accounts({
+                set: new PublicKey('6uzQe1NzrZ7NmeM9qz5pkYD8ViKeobmdM5VAPaV6pBHB'),
+            })
+            .rpc()
+        console.log('decreaseCounter called', { decrease })
 
     }, [publicKey, sendTransaction, connection])
 
     return (
         <button onClick={callProgram} disabled={!publicKey}>
-            Hello World call custom program id
+            Counter program
         </button>
     );
 };
