@@ -1,8 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
 
-const idl = { "version": "0.1.0", "name": "hello_world", "instructions": [{ "name": "hello", "accounts": [], "args": [] }, { "name": "anotherFunc", "accounts": [], "args": [] }, { "name": "decreaseCounter", "accounts": [{ "name": "set", "isMut": true, "isSigner": true }, { "name": "signer", "isMut": true, "isSigner": true }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [{ "name": "number", "type": "u64" }] }, { "name": "increaseCounter", "accounts": [{ "name": "set", "isMut": true, "isSigner": true }, { "name": "signer", "isMut": true, "isSigner": true }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [{ "name": "number", "type": "u64" }] }], "accounts": [{ "name": "Interactions", "type": { "kind": "struct", "fields": [{ "name": "counter", "type": "u64" }] } }] }
+const idl = { "version": "0.1.0", "name": "my_counter", "instructions": [{ "name": "initalize", "accounts": [{ "name": "set", "isMut": true, "isSigner": true }, { "name": "user", "isMut": true, "isSigner": true }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [] }, { "name": "decreaseCounter", "accounts": [{ "name": "set", "isMut": true, "isSigner": false }], "args": [{ "name": "number", "type": "u8" }] }, { "name": "increaseCounter", "accounts": [{ "name": "set", "isMut": true, "isSigner": false }], "args": [{ "name": "number", "type": "u8" }] }], "accounts": [{ "name": "Counter", "type": { "kind": "struct", "fields": [{ "name": "count", "type": "u8" }] } }], "errors": [{ "code": 6000, "name": "DataInputInvalid", "msg": "Only positive numbers supported" }, { "code": 6001, "name": "MaxStepSize", "msg": "Max step size is 5" }] }
 
 export default {
-    programId: new PublicKey('7aAKLxbTS8nGaD5QEpbTooNhqjYn8s6sMmQ4gZJYsQrg'),
+    programId: new PublicKey('53fUjUVA7GCU2r279UD43NjCXRaR2dnocwwDZQKvAf1w'),
     idl,
 }
