@@ -5,7 +5,6 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import { createCounter, decreaseCounter, increaseCounter } from "@/hooks/counter";
 import config from "@/config";
 import { getDataAccounts } from "@/hooks/anchor";
-import { get } from "http";
 const { BN } = anchor
 
 interface CounterAcc { publicKey: PublicKey, account: { count: number } }
@@ -18,7 +17,7 @@ export const HelloWorld: FC = () => {
     const WalletData = { connection, wallet, programId: config.programId }
 
     const getData = async () => {
-        const accs = (await getDataAccounts(connection, wallet, config.programId)) as unknown as CounterAcc[]
+        const accs = (await getDataAccounts<CounterAcc>(connection, wallet, config.programId))
         setDataAccs(accs)
     }
 

@@ -16,7 +16,7 @@ export const createCounter = async ({ connection, wallet, programId }: Wrapper, 
     const program = await getProgram(connection, wallet, programId)
     const counterAcc = Keypair.generate()
 
-    await program.methods
+    const hash = await program.methods
         .initalize()
         .accounts({
             set: counterAcc.publicKey,
@@ -26,7 +26,7 @@ export const createCounter = async ({ connection, wallet, programId }: Wrapper, 
         .signers([counterAcc])
         .rpc()
 
-    return counterAcc.publicKey
+    return { hash, pubKey: counterAcc.publicKey }
 }
 
 export const increaseCounter = async ({
@@ -37,12 +37,13 @@ export const increaseCounter = async ({
     if (!wallet) throw new WalletNotConnectedError();
     const program = await getProgram(connection, wallet, programId)
 
-    await program.methods
+    const hash = await program.methods
         .increaseCounter(new anchor.BN(number))
         .accounts({
             set: counterKey,
         })
         .rpc()
+    return hash
 }
 
 export const decreaseCounter = async ({
@@ -51,12 +52,13 @@ export const decreaseCounter = async ({
     if (!wallet) throw new WalletNotConnectedError();
     const program = await getProgram(connection, wallet, programId)
 
-    await program.methods
+    const hash = await program.methods
         .decreaseCounter(new anchor.BN(number))
         .accounts({
             set: counterKey,
         })
         .rpc()
+    return hash
 }
 
 

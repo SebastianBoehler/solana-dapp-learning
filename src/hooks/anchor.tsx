@@ -17,9 +17,9 @@ export const getProgram = async (connection: Connection, wallet: AnchorWallet | 
     return program
 }
 
-export const getDataAccounts = async (connection: Connection, wallet: AnchorWallet | undefined, programId: Address) => {
+export const getDataAccounts = async <T extends unknown>(connection: Connection, wallet: AnchorWallet | undefined, programId: Address) => {
     if (!wallet) return []
     const program = await getProgram(connection, wallet, programId)
-    const accs = await program.account.counter.all()
+    const accs = await program.account.counter.all() as T[]
     return accs
 }
