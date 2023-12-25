@@ -34,8 +34,9 @@ mod my_counter {
     }
 
     pub fn decrease_counter(ctx: Context<UpdateCounter>, number: u8) -> Result<()> {
+        require!(number > 10, MyError::MaxStepSize);
         ctx.accounts.set.count -= number;
-        msg!("Decrease counter");
+        msg!("Decrease counter {}", number);
         Ok(())
     }
 
@@ -44,7 +45,7 @@ mod my_counter {
             return err!(MyError::MaxStepSize);
         }
         ctx.accounts.set.count += number;
-        msg!("Increased counter");
+        msg!("Increased counter {}", number);
         Ok(())
     }
 }
@@ -52,6 +53,6 @@ mod my_counter {
 pub enum MyError {
     #[msg("Only positive numbers supported")]
     DataInputInvalid,
-    #[msg("Max step size is 5")]
+    #[msg("Max step size is too big")]
     MaxStepSize,
 }
