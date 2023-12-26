@@ -23,3 +23,10 @@ export const getDataAccounts = async <T extends unknown>(connection: Connection,
     const accs = await program.account.counter.all() as T[]
     return accs
 }
+
+export const fetchDataAccount = async <T extends unknown>(connection: Connection, wallet: AnchorWallet | undefined, programId: Address, pubKey: PublicKey) => {
+    if (!wallet) return
+    const program = await getProgram(connection, wallet, programId)
+    const acc = await program.account.counter.fetch(pubKey) as T
+    return acc
+}

@@ -10,11 +10,11 @@ import * as anchor from '@project-serum/anchor'
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { createCounter, decreaseCounter, increaseCounter } from "@/hooks/counter";
 import config from "@/config";
-import { getDataAccounts, getProgram } from "@/hooks/anchor";
+import { fetchDataAccount } from "@/hooks/anchor";
 
 const { BN } = anchor
 
-interface CounterAcc { publicKey: PublicKey, account: { count: number } }
+interface CounterAcc { count: number }
 
 export const Counter: FC = () => {
   const { connection } = useConnection();
@@ -25,17 +25,15 @@ export const Counter: FC = () => {
   const WalletData = { connection, wallet, programId: config.programId }
 
   const getData = async () => {
-    const accs = await getDataAccounts<CounterAcc>(connection, wallet, config.programId)
-    console.log(accs.map(acc => acc.publicKey.toBase58()))
-    const acc = accs.find(acc => acc.publicKey.toBase58() === dataAccPubKey?.toBase58())
-    console.log('getdata', accs, acc, dataAccPubKey?.toBase58())
+    if (!dataAccPubKey) return
+    const acc = await fetchDataAccount<CounterAcc>(connection, wallet, config.programId, dataAccPubKey)
     if (acc) setDataAcc(acc)
   }
 
   useEffect(() => {
     setTimeout(() => {
       getData()
-    }, 1000 * 3);
+    }, 1000 * 2);
   }, [dataAccPubKey])
 
 
@@ -108,10 +106,10 @@ export const Counter: FC = () => {
                 </Button>
               </div>
               <div className="mt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Public Address: {dataAcc?.publicKey.toBase58()}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Public Address: {dataAccPubKey?.toBase58()}</p>
               </div>
               <div className="mt-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.account.count}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count}</p>
               </div>
             </CardContent>
           </Card>
