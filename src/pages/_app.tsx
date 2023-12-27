@@ -1,6 +1,6 @@
 import type { AppProps } from 'next/app'
 import { ConnectionProvider, WalletProvider, useAnchorWallet } from "@solana/wallet-adapter-react"
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui"
+import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui"
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom"
 import "@solana/wallet-adapter-react-ui/styles.css"
 import { useEffect, useMemo, useState } from 'react'

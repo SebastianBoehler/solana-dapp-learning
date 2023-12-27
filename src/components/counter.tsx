@@ -10,7 +10,7 @@ import * as anchor from '@project-serum/anchor'
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { createCounter, decreaseCounter, increaseCounter } from "@/hooks/counter";
 import config from "@/config";
-import { fetchDataAccount } from "@/hooks/anchor";
+import { fetchDataAccount, getProgram } from "@/hooks/anchor";
 
 const { BN } = anchor
 
@@ -71,11 +71,12 @@ export const Counter: FC = () => {
               </h1>
               <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
                 Initiate a new counter and manage its value with ease. Click the button below to get started.
+                <p className="text-sm py-4">Currently on devnet only</p>
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
               <Button
-                className="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300 disabled:cursor-not-allowed"
                 onClick={() => { create() }}
                 disabled={!publicKey}
               >

@@ -6,10 +6,10 @@ import './style.css'
 const IndexPage: React.FC = () => {
 
     return (
-        <div>
-            <div className="flex justify-end p-4">
+        <div className='px-12'>
+            <div className="flex justify-end py-8">
                 <div className="ml-4">
-                    <WalletMultiButton style={{ backgroundColor: 'lightblue' }} />
+                    <WalletMultiButton style={{ backgroundColor: 'midnightblue' }} />
                 </div>
             </div>
             <Counter />
