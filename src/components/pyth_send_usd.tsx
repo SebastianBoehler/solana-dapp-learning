@@ -43,7 +43,7 @@ export function PythSendUsd() {
 
   return (
     <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-      <div className="container px-4 md:px-6">
+      <div className="container px-8 md:px-12 lg:px-24 xl:px-32">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
@@ -73,6 +73,7 @@ export function PythSendUsd() {
                   }}
                 />
                 <Button
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
                   onClick={send}
                   disabled={usdAmount <= 0 || !recipientAddress}
                 >Send</Button>

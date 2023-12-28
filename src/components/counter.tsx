@@ -61,7 +61,7 @@ export const Counter: FC = () => {
   }, [wallet, connection, dataAccPubKey])
 
   return (
-    <section key="1" className="w-11/12 py-24 mx-auto">
+    <section key="1" className="w-11/12 mx-auto py-12 md:py-24 lg:py-32 xl:py-48">
       <div className="container px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-12 xl:grid-cols-[1fr_1fr]">
           <div className="flex flex-col justify-center space-y-4">
