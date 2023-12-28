@@ -7,17 +7,12 @@ declare_id!("SwaoHArzRjzX16rctWM6EdeFBWHbitv91H3QuwELeyd");
 const SOL_USD_PRICEFEED_ID: &str = "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix";
 
 #[program]
-mod hello_anchor {
+mod pyth_program {
     use super::*;
     use anchor_lang::solana_program::{
         native_token::LAMPORTS_PER_SOL, program::invoke, system_instruction,
     };
     use std::str::FromStr;
-    pub fn initialize(ctx: Context<Initialize>, data: u64) -> Result<()> {
-        ctx.accounts.new_account.data = data;
-        msg!("Changed data to: {}!", data); // Message will show up in the tx logs
-        Ok(())
-    }
 
     pub fn pay_usd(ctx: Context<PayUSD>, amount: u64) -> Result<()> {
         //enforce the pyth feed key to prevent exploits
@@ -54,24 +49,6 @@ pub struct PayUSD<'info> {
     pub to: AccountInfo<'info>,
     pub sol_usd_price_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct Initialize<'info> {
-    // We must specify the space in order to initialize an account.
-    // First 8 bytes are default account discriminator,
-    // next 8 bytes come from NewAccount.data being type u64.
-    // (u64 = 64 bits unsigned integer = 8 bytes)
-    #[account(init, payer = signer, space = 8 + 8)]
-    pub new_account: Account<'info, NewAccount>,
-    #[account(mut)]
-    pub signer: Signer<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[account]
-pub struct NewAccount {
-    data: u64,
 }
 
 #[error_code]
