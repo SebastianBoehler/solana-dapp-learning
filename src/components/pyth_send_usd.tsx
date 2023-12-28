@@ -13,7 +13,10 @@ import { PublicKey } from "@solana/web3.js";
 import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
 import * as anchor from '@project-serum/anchor'
 import { BN } from "@project-serum/anchor";
-import { toast } from "react-toastify";
+
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+hljs.registerLanguage('javascript', javascript)
 
 export function PythSendUsd() {
   const { connection } = useConnection();
@@ -58,8 +61,8 @@ export function PythSendUsd() {
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">Send Money Instantly</h1>
               <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
-                Input the recipient's address, enter the amount in USD and press 'Send'. The system will convert the USD
-                to SOL and initiate the transfer instantly.
+                Input the recipient's address and the amount in USD.
+                The system will use Pyth Network's price feeds to convert the USD amount into SOL and initiate the transfer instantly.
               </p>
             </div>
             <div className="w-full max-w-sm space-y-2">
@@ -95,13 +98,35 @@ export function PythSendUsd() {
             </div>
           </div>
           <div className="flex flex-col justify-center space-y-4">
-            <img
-              alt="Send Money"
-              className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
-              height="500"
-              src="/placeholder.svg"
-              width="500"
-            />
+            <pre>
+              <code className="text-xs">
+                {`pub fn pay_usd(ctx: Context<PayUSD>, amount: u64) -> Result<()> {
+  //enforce the pyth feed key to prevent exploits
+  if Pubkey::from_str(SOL_USD_PRICEFEED_ID) != Ok(ctx.accounts.sol_usd_price_account.key()) {
+    return Err(error!(CustomError::WrongPriceFeedId));
+  };
+
+  let sol_usd_price_feed =
+  load_price_feed_from_account_info(&ctx.accounts.sol_usd_price_account).unwrap();
+
+  let current_time = Clock::get()?.unix_timestamp;
+  if let Some(current_price) = sol_usd_price_feed.get_price_no_older_than(current_time, 60) {
+    let amount_in_lamports =
+    amount * LAMPORTS_PER_SOL * 10u64.pow(u32::try_from(-current_price.expo).unwrap())
+    / (u64::try_from(current_price.price).unwrap());
+    let transfer_instruction = system_instruction::transfer(
+      &ctx.accounts.from.key(),
+      &ctx.accounts.to.key(),
+    amount_in_lamports,
+    );
+      invoke(&transfer_instruction, &ctx.accounts.to_account_infos())
+    } else {
+    return Err(error!(CustomError::PriceIsDown));
+  };
+  Ok(())
+}`}
+              </code>
+            </pre>
           </div>
         </div>
       </div>
