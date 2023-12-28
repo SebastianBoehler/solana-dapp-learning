@@ -13,6 +13,7 @@ import { PublicKey } from "@solana/web3.js";
 import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
 import * as anchor from '@project-serum/anchor'
 import { BN } from "@project-serum/anchor";
+import { toast } from "react-toastify";
 
 export function PythSendUsd() {
   const { connection } = useConnection();
@@ -26,6 +27,8 @@ export function PythSendUsd() {
     if (usdAmount <= 0) throw new Error(`trying to send ${usdAmount} USD. Amount must be greater than 0`)
     const program = await getProgram(connection, wallet, config.payUsdProgramId, config.payUsdIdl)
 
+    console.log('sending', usdAmount, 'USD to', recipientAddress)
+
     const hash = await program.methods
       .payUsd(new BN(usdAmount))
       .accounts({
@@ -36,7 +39,13 @@ export function PythSendUsd() {
 
       })
       .rpc()
+      .catch((err) => {
+        console.error(err)
+        alert('Transaction failed. Please try again.')
+        return null
+      })
 
+    if (hash) alert(`Tx hash: ${hash}`)
     console.log('tx hash', hash)
     return hash
   }, [wallet, connection, publicKey, usdAmount, recipientAddress])
@@ -63,15 +72,17 @@ export function PythSendUsd() {
                     setRecipientAddress(e.target.value)
                   }}
                 />
-                <Input
-                  className="max-w-lg flex-1"
-                  placeholder="Amount in USD"
-                  type="number"
-                  min={0.000000001}
-                  onChange={(e) => {
-                    setUsdAmount(Number(e.target.value))
-                  }}
-                />
+                <div className="relative max-w-lg">
+                  <Input
+                    className="pr-12"
+                    placeholder="Amount"
+                    type="number"
+                    onChange={(e) => {
+                      setUsdAmount(Number(e.target.value))
+                    }}
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2">USD</span>
+                </div>
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 text-white"
                   onClick={send}
