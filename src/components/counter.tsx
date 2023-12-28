@@ -22,11 +22,11 @@ export const Counter: FC = () => {
   const wallet = useAnchorWallet()
   const [dataAcc, setDataAcc] = React.useState<CounterAcc>()
   const [dataAccPubKey, setDataAccPubKey] = React.useState<PublicKey>()
-  const WalletData = { connection, wallet, programId: config.programId }
+  const WalletData = { connection, wallet, programId: config.counterProgramId }
 
   const getData = async () => {
     if (!dataAccPubKey) return
-    const acc = await fetchDataAccount<CounterAcc>(connection, wallet, config.programId, dataAccPubKey)
+    const acc = await fetchDataAccount<CounterAcc>(connection, wallet, config.counterProgramId, dataAccPubKey, config.counterIdl)
     if (acc) setDataAcc(acc)
   }
 

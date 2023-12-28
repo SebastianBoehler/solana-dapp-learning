@@ -4,7 +4,6 @@ import { Counter } from '@/components/counter';
 import './style.css'
 
 const IndexPage: React.FC = () => {
-
     return (
         <div>
             <div className="flex justify-end mr-8 mt-8">

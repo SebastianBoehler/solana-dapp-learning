@@ -12,7 +12,6 @@ const ArbitragePage: React.FC = () => {
                     <WalletMultiButton style={{ backgroundColor: 'midnightblue' }} />
                 </div>
             </div>
-            <Counter />
         </div>
     );
 };

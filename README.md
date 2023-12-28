@@ -1,6 +1,7 @@
 # Solana DApp Learning
 
 Creating my first DApp on Solana with Next.js.
+[View Live App](https://dapp-showcase-sand.vercel.app/)
 
 ## Built With
 
@@ -18,7 +19,3 @@ Join me on my journey of learning DApp and smart contract development on Solana.
 ## Getting Started
 
 To get a local copy up and running, follow these simple steps...
-
-# solana-dapp-learning
-
-Creating my first DAPP on solana with Next.JS
