@@ -15,7 +15,7 @@ export interface Wrapper {
 export const createCounter = async ({ connection, wallet, programId }: Wrapper, user: anchor.web3.PublicKey | null) => {
     if (!wallet || !user) throw new WalletNotConnectedError();
     const program = await getProgram(connection, wallet, programId, config.counterIdl)
-    const counterAcc = Keypair.generate()
+    const counterAcc = Keypair.fromSeed(user.toBuffer())
 
     const hash = await program.methods
         .initalize()

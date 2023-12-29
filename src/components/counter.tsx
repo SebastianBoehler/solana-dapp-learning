@@ -21,13 +21,17 @@ export const Counter: FC = () => {
   const { publicKey } = useWallet();
   const wallet = useAnchorWallet()
   const [dataAcc, setDataAcc] = React.useState<CounterAcc>()
+  const [hasCounter, setHasCounter] = React.useState<boolean>(false)
   const [dataAccPubKey, setDataAccPubKey] = React.useState<PublicKey>()
   const WalletData = { connection, wallet, programId: config.counterProgramId }
 
   const getData = async () => {
     if (!dataAccPubKey) return
     const acc = await fetchDataAccount<CounterAcc>(connection, wallet, config.counterProgramId, dataAccPubKey, config.counterIdl)
-    if (acc) setDataAcc(acc)
+    if (acc) {
+      setDataAcc(acc)
+      setHasCounter(true)
+    }
   }
 
   useEffect(() => {
@@ -36,13 +40,21 @@ export const Counter: FC = () => {
     }, 1000 * 2);
   }, [dataAccPubKey])
 
+  useEffect(() => {
+    if (!publicKey) return
+    const counterAcc = Keypair.fromSeed(publicKey.toBuffer())
+    setDataAccPubKey(counterAcc.publicKey)
+  }, [publicKey])
+
 
   const create = useCallback(async () => {
     const { pubKey } = await createCounter(WalletData, publicKey)
-    //TODO: notify with hash
     console.log('initiated counter', pubKey.toBase58())
-    setDataAccPubKey(pubKey)
-  }, [wallet, connection])
+
+    setTimeout(() => {
+      getData()
+    }, 1000 * 2);
+  }, [wallet, connection, publicKey])
 
   const increase = useCallback(async () => {
     if (!dataAccPubKey) return
@@ -61,8 +73,9 @@ export const Counter: FC = () => {
   }, [wallet, connection, dataAccPubKey])
 
   return (
-    <section key="1" className="w-11/12 mx-auto py-12 md:py-24 lg:py-32 xl:py-48">
-      <div className="container px-4 md:px-6">
+    //w-full py-8 md:py-16 lg:py-24 xl:py-32
+    <section key="1" className="w-full py-8 md:py-16 lg:py-24 xl:py-32">
+      <div className="container px-8 md:px-12 lg:px-24 xl:px-32 mx-auto">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-12 xl:grid-cols-[1fr_1fr]">
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
@@ -71,14 +84,13 @@ export const Counter: FC = () => {
               </h1>
               <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
                 Initiate a new counter and manage its value with ease. Click the button below to get started.
-                <p className="text-sm py-4">Currently on devnet only</p>
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
               <Button
-                className="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300 disabled:cursor-not-allowed"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-black px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => { create() }}
-                disabled={!publicKey}
+                disabled={!publicKey || hasCounter}
               >
                 Initiate Counter
               </Button>
@@ -96,18 +108,18 @@ export const Counter: FC = () => {
                 <Button
                   onClick={() => { increase() }}
                   disabled={!dataAcc}
-                  className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300">
+                  className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
                   Increase
                 </Button>
                 <Button
                   onClick={() => { decrease() }}
                   disabled={!dataAcc}
-                  className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300">
+                  className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
                   Decrease
                 </Button>
               </div>
               <div className="mt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Public Address: {dataAccPubKey?.toBase58()}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 overflow-auto">Public Address: {dataAccPubKey?.toBase58()}</p>
               </div>
               <div className="mt-2">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count}</p>

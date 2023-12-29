@@ -2,15 +2,14 @@ import React from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Counter } from '@/components/counter';
 import './style.css'
+import { PythSendUsd } from '@/components/pyth_send_usd';
+import { Header } from '@/components/header';
 
 const IndexPage: React.FC = () => {
     return (
         <div>
-            <div className="flex justify-end mr-8 mt-8">
-                <div>
-                    <WalletMultiButton style={{ backgroundColor: 'midnightblue' }} />
-                </div>
-            </div>
+            <Header />
+            <PythSendUsd />
             <Counter />
         </div>
     );

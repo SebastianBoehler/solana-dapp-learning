@@ -6,17 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import config from "@/config";
 import { getProgram } from "@/hooks/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
 import * as anchor from '@project-serum/anchor'
 import { BN } from "@project-serum/anchor";
-
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-hljs.registerLanguage('javascript', javascript)
 
 export function PythSendUsd() {
   const { connection } = useConnection();
@@ -54,8 +50,8 @@ export function PythSendUsd() {
   }, [wallet, connection, publicKey, usdAmount, recipientAddress])
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-      <div className="container px-8 md:px-12 lg:px-24 xl:px-32">
+    <section className="w-full py-8 md:py-16 lg:py-24 xl:py-32">
+      <div className="container px-8 md:px-12 lg:px-24 xl:px-32 mx-auto">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
@@ -87,7 +83,7 @@ export function PythSendUsd() {
                   <span className="absolute right-3 top-1/2 transform -translate-y-1/2">USD</span>
                 </div>
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="bg-black hover:bg-blue-600 text-white"
                   onClick={send}
                   disabled={usdAmount <= 0 || !recipientAddress}
                 >Send</Button>
@@ -97,7 +93,7 @@ export function PythSendUsd() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col justify-center space-y-4">
+          <div className="flex flex-col justify-center space-y-4 hidden md:block overflow-x-auto sm:mt-8">
             <pre>
               <code className="text-xs">
                 {`pub fn pay_usd(ctx: Context<PayUSD>, amount: u64) -> Result<()> {
