@@ -119,7 +119,7 @@ export const Counter: FC = () => {
                 </Button>
               </div>
               <div className="mt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400 overflow-auto">Public Address: {dataAccPubKey?.toBase58()}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 overflow-auto">Public Address: {hasCounter ? dataAccPubKey?.toBase58() : null}</p>
               </div>
               <div className="mt-2">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count}</p>
