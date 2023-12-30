@@ -15,19 +15,27 @@ export interface Wrapper {
 export const createCounter = async ({ connection, wallet, programId }: Wrapper, user: anchor.web3.PublicKey | null) => {
     if (!wallet || !user) throw new WalletNotConnectedError();
     const program = await getProgram(connection, wallet, programId, config.counterIdl)
-    const counterAcc = Keypair.fromSeed(user.toBuffer())
+
+    const [userCounterPDA, _] = PublicKey.findProgramAddressSync(
+        [
+            anchor.utils.bytes.utf8.encode("counter"),
+            wallet.publicKey.toBuffer(),
+        ],
+        program.programId
+    );
+
+    console.log('userCounterPDA', userCounterPDA.toBase58(), _)
 
     const hash = await program.methods
-        .initalize()
+        .initialize()
         .accounts({
-            set: counterAcc.publicKey,
+            set: userCounterPDA,
             user,
             systemProgram: anchor.web3.SystemProgram.programId,
         })
-        .signers([counterAcc])
         .rpc()
 
-    return { hash, pubKey: counterAcc.publicKey }
+    return { hash, pubKey: userCounterPDA }
 }
 
 export const increaseCounter = async ({

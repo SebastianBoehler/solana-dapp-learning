@@ -31,37 +31,45 @@ export const Counter: FC = () => {
     if (acc) {
       setDataAcc(acc)
       setHasCounter(true)
+    } else {
+      setHasCounter(false)
     }
   }
 
   useEffect(() => {
-    setTimeout(() => {
-      getData()
-    }, 1000 * 2);
+    if (!dataAccPubKey) return
+    getData()
   }, [dataAccPubKey])
 
   useEffect(() => {
     if (!publicKey) return
-    const counterAcc = Keypair.fromSeed(publicKey.toBuffer())
-    setDataAccPubKey(counterAcc.publicKey)
+    const [userCounterPDA, _] = PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("counter"),
+        publicKey.toBuffer(),
+      ],
+      config.counterProgramId
+    );
+    setDataAccPubKey(userCounterPDA)
   }, [publicKey])
 
 
   const create = useCallback(async () => {
     const { pubKey } = await createCounter(WalletData, publicKey)
-    console.log('initiated counter', pubKey.toBase58())
+    setDataAccPubKey(pubKey)
+    console.log('created counter', pubKey.toBase58())
 
     setTimeout(() => {
       getData()
-    }, 1000 * 2);
+    }, 1000);
   }, [wallet, connection, publicKey])
 
   const increase = useCallback(async () => {
     if (!dataAccPubKey) return
-    await increaseCounter(WalletData, dataAccPubKey, new BN(4))
+    const hash = await increaseCounter(WalletData, dataAccPubKey, new BN(4))
     setTimeout(() => {
       getData()
-    }, 1000 * 2);
+    }, 1000);
   }, [wallet, connection, dataAccPubKey])
 
   const decrease = useCallback(async () => {
@@ -122,7 +130,7 @@ export const Counter: FC = () => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 overflow-auto">Public Address: {hasCounter ? dataAccPubKey?.toBase58() : null}</p>
               </div>
               <div className="mt-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count.toString()}</p>
               </div>
             </CardContent>
           </Card>
