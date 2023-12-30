@@ -33,6 +33,7 @@ export const Counter: FC = () => {
       setHasCounter(true)
     } else {
       setHasCounter(false)
+      setDataAcc(undefined)
     }
   }
 
@@ -86,7 +87,7 @@ export const Counter: FC = () => {
       <div className="container px-8 md:px-12 lg:px-24 xl:px-32 mx-auto">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-12 xl:grid-cols-[1fr_1fr]">
           <div className="flex flex-col justify-center space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 mb-8">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                 Create and Manage Your Counter
               </h1>
@@ -94,46 +95,83 @@ export const Counter: FC = () => {
                 Initiate a new counter and manage its value with ease. Click the button below to get started.
               </p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Button
-                className="inline-flex h-10 items-center justify-center rounded-md bg-black px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => { create() }}
-                disabled={!publicKey || hasCounter}
-              >
-                Initiate Counter
-              </Button>
-            </div>
+            <Card>
+              <CardContent className="flex flex-col items-start gap-2 p-4">
+                <div className="space-y-1 leading-none">
+                  <h2 className="text-2xl font-semibold">Manage Your Counter</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Use the buttons below to increase, decrease or create your counter.
+                  </p>
+                </div>
+                <div className={hasCounter ? 'hidden' : 'block'}>
+                  <Button
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-black px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => { create() }}
+                    disabled={!publicKey || hasCounter}
+                  >
+                    Initiate Counter
+                  </Button>
+                </div>
+                <div className={hasCounter ? 'block' : 'hidden'}>
+                  <div className="flex flex-row gap-2 mt-4">
+                    <Button
+                      onClick={() => { increase() }}
+                      disabled={!dataAcc}
+                      className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
+                      Increase
+                    </Button>
+                    <Button
+                      onClick={() => { decrease() }}
+                      disabled={!dataAcc}
+                      className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
+                      Decrease
+                    </Button>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 overflow-auto">Public Address: {hasCounter ? dataAccPubKey?.toBase58() : null}</p>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count.toString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <Card>
-            <CardContent className="flex flex-col items-start gap-2 p-4">
-              <div className="space-y-1 leading-none">
-                <h2 className="text-2xl font-semibold">Manage Your Counter</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Use the buttons below to increase or decrease your counter.
-                </p>
-              </div>
-              <div className="flex flex-row gap-2 mt-4">
-                <Button
-                  onClick={() => { increase() }}
-                  disabled={!dataAcc}
-                  className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
-                  Increase
-                </Button>
-                <Button
-                  onClick={() => { decrease() }}
-                  disabled={!dataAcc}
-                  className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
-                  Decrease
-                </Button>
-              </div>
-              <div className="mt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400 overflow-auto">Public Address: {hasCounter ? dataAccPubKey?.toBase58() : null}</p>
-              </div>
-              <div className="mt-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Current Count: {dataAcc?.count.toString()}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col justify-center space-y-4 hidden md:block overflow-x-auto sm:mt-8">
+            <pre>
+              <code className="text-xs">
+                {`#[derive(Accounts)]
+pub struct Initalize<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    #[account(
+        init, payer = user, space = 8 + 1,
+        seeds=[b"counter", user.key().as_ref()], bump
+    )]
+    pub set: Account<'info, Counter>,
+    pub system_program: Program<'info, System>,
+}
+
+#[program]
+mod my_counter {
+    use super::*;
+    pub fn initialize(ctx: Context<Initalize>) -> Result<()> {
+        ctx.accounts.set.count = 0;
+        msg!("Initalize account");
+        Ok(())
+    }
+    pub fn decrease_counter(ctx: Context<UpdateCounter>, number: u8) -> Result<()> {
+        require!(number > 10, MyError::MaxStepSize);
+        ctx.accounts.set.count -= number;
+        msg!("Decrease counter {}", number);
+        Ok(())
+    }
+    
+    [...]
+}`}
+              </code>
+            </pre>
+          </div>
         </div>
         <div className="flex justify-end mt-6" />
       </div>
