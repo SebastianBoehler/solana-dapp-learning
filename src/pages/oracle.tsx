@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
 import './style.css'
-import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import config from '@/config';
-import { Connection, Keypair, PublicKey, Struct, Transaction, TransactionInstruction, clusterApiUrl, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Connection, Keypair, Transaction, TransactionInstruction, clusterApiUrl, sendAndConfirmTransaction } from '@solana/web3.js';
 import { Button } from '@/components/ui/button';
 import { setInterval } from 'timers';
-import { web3 } from '@project-serum/anchor';
 import { sha256 } from "js-sha256";
+import { createOraclePdaManually, createOraclePdaUsingAnchor } from '@/hooks/oracle';
 
 const IndexPage: React.FC = () => {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed")
@@ -19,32 +18,8 @@ const IndexPage: React.FC = () => {
     const keypair = Keypair.fromSeed(new Uint8Array(seed));
 
     const init = useCallback(async () => {
-        //init oracle
-        // Define the fixed instruction identifier
-        const name = 'global' + ':' + 'initialize';
-        const instructionIdentifier = Buffer.from(sha256.digest(name)).subarray(0, 8)
-
-        const keys = [
-            { pubkey: pda.publicKey, isSigner: true, isWritable: true },
-            { pubkey: keypair.publicKey, isSigner: true, isWritable: true },
-            {
-                pubkey: web3.SystemProgram.programId,
-                isSigner: false,
-                isWritable: false,
-            },
-        ];
-
-        let transaction = new Transaction();
-        transaction.add(
-            new TransactionInstruction({
-                keys,
-                programId: config.myOracleProgramId,
-                data: instructionIdentifier,
-            }),
-        );
-
-        const hash = await sendAndConfirmTransaction(connection, transaction, [keypair, pda])
-        console.log(hash)
+        console.log(await createOraclePdaManually(keypair, connection))
+        console.log(await createOraclePdaUsingAnchor(keypair, connection))
 
     }, [connection, keypair])
 
