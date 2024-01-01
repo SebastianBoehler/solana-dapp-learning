@@ -24,7 +24,7 @@ export const createCounter = async ({ connection, wallet, programId }: Wrapper, 
         program.programId
     );
 
-    console.log('userCounterPDA', userCounterPDA.toBase58(), _)
+    console.log('userCounterPDA', userCounterPDA.toBase58())
 
     const hash = await program.methods
         .initialize()
@@ -65,6 +65,23 @@ export const decreaseCounter = async ({
         .decreaseCounter(new anchor.BN(number))
         .accounts({
             set: counterKey,
+        })
+        .rpc()
+    return hash
+}
+
+export const closeCounter = async ({
+    connection, wallet, programId
+}: Wrapper, counterKey: Address) => {
+    if (!wallet) throw new WalletNotConnectedError();
+    const program = await getProgram(connection, wallet, programId, config.counterIdl)
+
+    const hash = await program.methods
+        .closeCounterPda()
+        .accounts({
+            set: counterKey,
+            user: wallet.publicKey,
+            systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc()
     return hash

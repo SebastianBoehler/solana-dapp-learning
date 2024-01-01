@@ -8,7 +8,7 @@ import { useConnection, useWallet, useAnchorWallet } from "@solana/wallet-adapte
 import React, { FC, useCallback, useEffect } from "react";
 import * as anchor from '@project-serum/anchor'
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { createCounter, decreaseCounter, increaseCounter } from "@/hooks/counter";
+import { closeCounter, createCounter, decreaseCounter, increaseCounter } from "@/hooks/counter";
 import config from "@/config";
 import { fetchDataAccount, getProgram } from "@/hooks/anchor";
 
@@ -81,6 +81,13 @@ export const Counter: FC = () => {
     }, 1000 * 2);
   }, [wallet, connection, dataAccPubKey])
 
+  const closePda = useCallback(async () => {
+    if (!dataAccPubKey) return
+    const hash = await closeCounter(WalletData, dataAccPubKey)
+    setDataAccPubKey(undefined)
+    setHasCounter(false)
+  }, [wallet, connection, dataAccPubKey])
+
   return (
     //w-full py-8 md:py-16 lg:py-24 xl:py-32
     <section key="1" className="w-full py-8 md:py-16 lg:py-24 xl:py-32">
@@ -125,6 +132,13 @@ export const Counter: FC = () => {
                       disabled={!dataAcc}
                       className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
                       Decrease
+                    </Button>
+                    <Button
+                      onClick={() => { closePda() }}
+                      disabled={!dataAcc}
+                      className="inline-flex h-10 bg-black items-center justify-center rounded-md px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      Delete Counter
                     </Button>
                   </div>
                   <div className="mt-4">

@@ -1,6 +1,6 @@
 import config from '@/config'
 import { Address, AnchorProvider, Idl, Program } from '@project-serum/anchor'
-import { AnchorWallet, Wallet } from '@solana/wallet-adapter-react'
+import { AnchorWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, Connection } from '@solana/web3.js'
 import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
 

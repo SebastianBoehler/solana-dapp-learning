@@ -22,7 +22,10 @@ export function PythSendUsd() {
   const [recipientAddress, setRecipientAddress] = useState<string>('')
 
   const send = useCallback(async () => {
-    if (!publicKey) throw new WalletNotConnectedError();
+    if (!publicKey) {
+      alert('Please connect your wallet first.')
+      return
+    }
     if (usdAmount <= 0) throw new Error(`trying to send ${usdAmount} USD. Amount must be greater than 0`)
     const program = await getProgram(connection, wallet, config.payUsdProgramId, config.payUsdIdl)
 
@@ -68,7 +71,7 @@ export function PythSendUsd() {
                   placeholder="Recipient's address"
                   type="text"
                   onChange={(e) => {
-                    setRecipientAddress(e.target.value)
+                    if (e.target.value.length === 32) setRecipientAddress(e.target.value)
                   }}
                 />
                 <div className="relative max-w-lg">
