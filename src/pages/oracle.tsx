@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect } from 'react';
 import './style.css'
 import config from '@/config';
-import { Connection, Keypair, Transaction, TransactionInstruction, clusterApiUrl, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, clusterApiUrl, sendAndConfirmTransaction } from '@solana/web3.js';
 import { Button } from '@/components/ui/button';
 import { setInterval } from 'timers';
 import { sha256 } from "js-sha256";
-import { createOraclePdaManually, createOraclePdaUsingAnchor } from '@/hooks/oracle';
+import { createOraclePdaUsingAnchor } from '@/hooks/oracle';
+import * as anchor from '@project-serum/anchor'
 
 const IndexPage: React.FC = () => {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed")
-    const [pda, setPDA] = React.useState<Keypair>(Keypair.generate())
+    const [pda, setPDA] = React.useState<PublicKey>()
 
     const seed = [
         145, 67, 244, 0, 128, 81, 28, 140, 30, 34, 98, 163, 92, 237, 42, 203, 188,
@@ -18,15 +19,27 @@ const IndexPage: React.FC = () => {
     const keypair = Keypair.fromSeed(new Uint8Array(seed));
 
     const init = useCallback(async () => {
-        console.log(await createOraclePdaManually(keypair, connection))
-        console.log(await createOraclePdaUsingAnchor(keypair, connection))
+        const [pda] = PublicKey.findProgramAddressSync(
+            [
+                anchor.utils.bytes.utf8.encode("oracle"),
+                keypair.publicKey.toBuffer(),
+            ],
+            config.myOracleProgramId
+        );
+        //await createOraclePdaManually(keypair, connection)
+        const hash = await createOraclePdaUsingAnchor(keypair, connection, pda, 'BTC/USD')
+        console.log(hash, pda.toBase58())
 
+        setPDA(pda)
     }, [connection, keypair])
 
     const writeData = useCallback(async () => {
         setInterval(async () => {
+            if (!pda) {
+                return
+            }
             const keys = [
-                { pubkey: pda.publicKey, isSigner: false, isWritable: true },
+                { pubkey: pda, isSigner: false, isWritable: true },
                 { pubkey: keypair.publicKey, isSigner: true, isWritable: true },
             ];
 
@@ -52,7 +65,7 @@ const IndexPage: React.FC = () => {
                 }),
             );
 
-            const hash = await sendAndConfirmTransaction(connection, transaction, [keypair, pda])
+            const hash = await sendAndConfirmTransaction(connection, transaction, [keypair])
             console.log(hash, data.toString())
         }, 1000 * 5)
     }, [])
@@ -60,7 +73,7 @@ const IndexPage: React.FC = () => {
     return (
         <div>
             <p>Pub key:  {keypair.publicKey.toBase58()}</p>
-            <p>pda: {pda.publicKey.toBase58()}</p>
+            <p>pda: {pda?.toBase58()}</p>
             <Button onClick={init}>Init</Button>
             <Button onClick={writeData}>Write data</Button>
         </div>

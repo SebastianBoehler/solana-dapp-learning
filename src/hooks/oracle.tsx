@@ -1,30 +1,27 @@
 import config from "@/config";
-import { Program } from "@project-serum/anchor";
-import { Connection, Keypair, TransactionInstruction } from "@solana/web3.js";
+import { BN, Program } from "@project-serum/anchor";
+import { Connection, Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { sendAndConfirmTransaction, Transaction, SystemProgram } from "@solana/web3.js";
 import { sha256 } from "js-sha256";
 
-export const createOraclePdaUsingAnchor = async (keypair: Keypair, connection: Connection) => {
-    const pda = Keypair.generate();
+export const createOraclePdaUsingAnchor = async (keypair: Keypair, connection: Connection, pda: PublicKey, name: string) => {
     const pg = new Program(config.myOracleIdl, config.myOracleProgramId, { connection })
 
     const instruction = await pg.methods
-        .initialize()
+        .initialize(name)
         .accounts({
-            signer: keypair.publicKey,
-            dataStore: pda.publicKey,
+            user: keypair.publicKey,
+            dataStore: pda,
             systemProgram: SystemProgram.programId,
         })
         .signers([keypair])
         .instruction()
 
-    let transaction = new Transaction();
-    transaction.add(
-        instruction,
-    );
+    const transaction = new Transaction();
+    transaction.add(instruction);
 
-    const hash = await sendAndConfirmTransaction(connection, transaction, [keypair, pda])
-    return { hash, pda: pda.publicKey }
+    const hash = await sendAndConfirmTransaction(connection, transaction, [keypair])
+    return hash
 }
 
 export const createOraclePdaManually = async (keypair: Keypair, connection: Connection) => {
@@ -49,5 +46,30 @@ export const createOraclePdaManually = async (keypair: Keypair, connection: Conn
     );
 
     const hash = await sendAndConfirmTransaction(connection, transaction, [keypair, pda])
-    return { hash, pda: pda.publicKey }
+    return { hash, pda }
+}
+
+export const writeData = async (pda: PublicKey, keypair: Keypair, connection: Connection, price: number) => {
+    const pg = new Program(config.myOracleIdl, config.myOracleProgramId, { connection })
+
+    const instruction = await pg.methods
+        .update(new BN(price))
+        .accounts({
+            user: keypair.publicKey,
+            dataStore: pda,
+        })
+        .signers([keypair])
+        .instruction()
+
+    const transaction = new Transaction();
+    transaction.add(instruction);
+
+    const hash = await sendAndConfirmTransaction(connection, transaction, [keypair])
+
+    return hash
+}
+
+export type DataStore = {
+    name: string,
+    data: number
 }

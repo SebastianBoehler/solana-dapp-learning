@@ -16,13 +16,19 @@ export function Header() {
       <div className="container px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
           <div className="flex flex-col justify-center space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl xl:text-6xl">
-                Explore my DAPPs on solana
+                EXPLORE MY DAPPS ON SOLANA
               </h1>
               <p className="max-w-[600px] text-gray-200 md:text-xl">
                 Discover a range of projects that I have built. Each project showcases my skills and
                 creativity in software development.
+              </p>
+              <p className="max-w-[600px] text-gray-200 md:text-xl">
+                The source code of all the projects can be found on {' '}
+                <a href="https://github.com/SebastianBoehler/solana-dapp-learning" target="_blank" rel="noopener noreferrer" className="underline">
+                  GitHub
+                </a>.
               </p>
             </div>
             <div>

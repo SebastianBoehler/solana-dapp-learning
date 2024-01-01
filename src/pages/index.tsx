@@ -4,6 +4,7 @@ import { Counter } from '@/components/counter';
 import './style.css'
 import { PythSendUsd } from '@/components/pyth_send_usd';
 import { Header } from '@/components/header';
+import { Oracle } from '@/components/oracle';
 
 const IndexPage: React.FC = () => {
     return (
@@ -11,6 +12,7 @@ const IndexPage: React.FC = () => {
             <Header />
             <PythSendUsd />
             <Counter />
+            <Oracle />
         </div>
     );
 };
