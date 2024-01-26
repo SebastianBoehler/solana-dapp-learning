@@ -2,6 +2,7 @@ import React from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Counter } from '@/components/counter';
 import './style.css'
+import { Arbitrage } from '@/components/arbitrage';
 
 const ArbitragePage: React.FC = () => {
 
@@ -12,6 +13,7 @@ const ArbitragePage: React.FC = () => {
                     <WalletMultiButton style={{ backgroundColor: 'midnightblue' }} />
                 </div>
             </div>
+            <Arbitrage />
         </div>
     );
 };

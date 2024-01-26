@@ -10,24 +10,43 @@ pub struct Counter {
 
 #[derive(Accounts)]
 pub struct Initalize<'info> {
-    #[account(init, payer = user, space = 8 + 1)]
-    pub set: Account<'info, Counter>,
     #[account(mut)]
     pub user: Signer<'info>,
+    #[account(
+        init, payer = user, space = 8 + 1,
+        seeds=[b"counter", user.key().as_ref()], bump
+    )]
+    pub set: Account<'info, Counter>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 pub struct UpdateCounter<'info> {
-    #[account(mut)]
+    user: Signer<'info>,
+    #[account(
+        mut,
+        seeds=[b"counter", user.key().as_ref()], bump
+    )]
     pub set: Account<'info, Counter>,
+}
+
+#[derive(Accounts)]
+pub struct CloseCounter<'info> {
+    user: Signer<'info>,
+    #[account(
+        mut,
+        seeds=[b"counter", user.key().as_ref()], bump,
+        close = user,
+    )]
+    pub set: Account<'info, Counter>,
+    pub system_program: Program<'info, System>,
 }
 
 #[program]
 mod my_counter {
     use super::*;
 
-    pub fn initalize(ctx: Context<Initalize>) -> Result<()> {
+    pub fn initialize(ctx: Context<Initalize>) -> Result<()> {
         ctx.accounts.set.count = 0;
         msg!("Initalize account");
         Ok(())
@@ -46,6 +65,10 @@ mod my_counter {
         }
         ctx.accounts.set.count += number;
         msg!("Increased counter {}", number);
+        Ok(())
+    }
+
+    pub fn close_counter_pda(_ctx: Context<CloseCounter>) -> Result<()> {
         Ok(())
     }
 }

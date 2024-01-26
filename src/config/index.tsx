@@ -11,5 +11,5 @@ export default {
     myOracleProgramId: new PublicKey('CR651qrjHq9v18JC9qqzHZcFThFTa9dycHXofxxFcotn'),
     counterIdl: counterIdl as Idl,
     payUsdIdl: payUsdIdl as Idl,
-    myOracleIdl: myOracle as Idl,
+    myOracleIdl: myOracle as Idl
 }
