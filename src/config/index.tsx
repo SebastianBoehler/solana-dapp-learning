@@ -1,15 +1,29 @@
-import { Idl } from '@project-serum/anchor';
-import { PublicKey } from '@solana/web3.js';
+import { address } from '@solana/kit';
 
-const counterIdl = { "version": "0.1.0", "name": "my_counter", "instructions": [{ "name": "initialize", "accounts": [{ "name": "user", "isMut": true, "isSigner": true }, { "name": "set", "isMut": true, "isSigner": false }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [] }, { "name": "decreaseCounter", "accounts": [{ "name": "user", "isMut": false, "isSigner": true }, { "name": "set", "isMut": true, "isSigner": false }], "args": [{ "name": "number", "type": "u8" }] }, { "name": "increaseCounter", "accounts": [{ "name": "user", "isMut": false, "isSigner": true }, { "name": "set", "isMut": true, "isSigner": false }], "args": [{ "name": "number", "type": "u8" }] }, { "name": "closeCounterPda", "accounts": [{ "name": "user", "isMut": false, "isSigner": true }, { "name": "set", "isMut": true, "isSigner": false }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [] }], "accounts": [{ "name": "Counter", "type": { "kind": "struct", "fields": [{ "name": "count", "type": "u8" }] } }], "errors": [{ "code": 6000, "name": "DataInputInvalid", "msg": "Only positive numbers supported" }, { "code": 6001, "name": "MaxStepSize", "msg": "Max step size is too big" }] }
-const payUsdIdl = { "version": "0.1.0", "name": "pyth_program", "instructions": [{ "name": "payUsd", "accounts": [{ "name": "from", "isMut": false, "isSigner": true }, { "name": "to", "isMut": true, "isSigner": false }, { "name": "solUsdPriceAccount", "isMut": false, "isSigner": false }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [{ "name": "amount", "type": "u64" }] }], "errors": [{ "code": 6000, "name": "PriceIsDown" }, { "code": 6001, "name": "WrongPriceFeedId" }] }
-const myOracle = { "version": "0.1.0", "name": "my_oracle", "instructions": [{ "name": "initialize", "accounts": [{ "name": "user", "isMut": true, "isSigner": true }, { "name": "dataStore", "isMut": true, "isSigner": false }, { "name": "systemProgram", "isMut": false, "isSigner": false }], "args": [{ "name": "name", "type": "string" }] }, { "name": "update", "accounts": [{ "name": "user", "isMut": false, "isSigner": true }, { "name": "dataStore", "isMut": true, "isSigner": false }], "args": [{ "name": "data", "type": "u64" }] }], "accounts": [{ "name": "DataStore", "type": { "kind": "struct", "fields": [{ "name": "name", "type": "string" }, { "name": "data", "type": "u64" }] } }] }
+export function counterProgramId() {
+    if (!process.env.NEXT_PUBLIC_COUNTER_PROGRAM_ID) {
+        throw new Error('Set NEXT_PUBLIC_COUNTER_PROGRAM_ID to your deployed Devnet counter program.');
+    }
+    return address(process.env.NEXT_PUBLIC_COUNTER_PROGRAM_ID);
+}
 
-export default {
-    counterProgramId: new PublicKey('53fUjUVA7GCU2r279UD43NjCXRaR2dnocwwDZQKvAf1w'),
-    payUsdProgramId: new PublicKey('SwaoHArzRjzX16rctWM6EdeFBWHbitv91H3QuwELeyd'),
-    myOracleProgramId: new PublicKey('CR651qrjHq9v18JC9qqzHZcFThFTa9dycHXofxxFcotn'),
-    counterIdl: counterIdl as Idl,
-    payUsdIdl: payUsdIdl as Idl,
-    myOracleIdl: myOracle as Idl
+export function oracleProgramId() {
+    if (!process.env.NEXT_PUBLIC_ORACLE_PROGRAM_ID) {
+        throw new Error('Set NEXT_PUBLIC_ORACLE_PROGRAM_ID to your deployed Devnet oracle program.');
+    }
+    return address(process.env.NEXT_PUBLIC_ORACLE_PROGRAM_ID);
+}
+
+export function payUsdProgramId() {
+    if (!process.env.NEXT_PUBLIC_PAY_USD_PROGRAM_ID) {
+        throw new Error('Set NEXT_PUBLIC_PAY_USD_PROGRAM_ID to your deployed Devnet payment program.');
+    }
+    return address(process.env.NEXT_PUBLIC_PAY_USD_PROGRAM_ID);
+}
+
+export function priceUpdateAccount() {
+    if (!process.env.NEXT_PUBLIC_SOL_USD_PRICE_ACCOUNT) {
+        throw new Error('Set NEXT_PUBLIC_SOL_USD_PRICE_ACCOUNT to a current Pyth SOL/USD Devnet price update account.');
+    }
+    return address(process.env.NEXT_PUBLIC_SOL_USD_PRICE_ACCOUNT);
 }

@@ -3,14 +3,14 @@
  * @see https://v0.dev/t/OeNiXkjUPgW
  */
 import { Button } from "@/components/ui/button"
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
+import { WalletButton } from "./wallet-button"
 
 export function Header() {
   return (
     <section className="w-full py-12 px-8 md:px-12 lg:px-24 xl:px-32 mx-auto bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 relative">
       <div className="absolute right-0 top-0 mt-8 mr-8 z-50 md:block hidden">
         <div>
-          <WalletMultiButton style={{ backgroundColor: 'midnightblue' }} />
+          <WalletButton />
         </div>
       </div>
       <div className="container px-4 md:px-6">
@@ -21,8 +21,7 @@ export function Header() {
                 EXPLORE MY DAPPS ON SOLANA
               </h1>
               <p className="max-w-[600px] text-gray-200 md:text-xl">
-                Discover a range of projects that I have built. Each project showcases my skills and
-                creativity in software development.
+                Learn wallet connections, transfers, counters, and oracle data with small Solana examples.
               </p>
               <p className="max-w-[600px] text-gray-200 md:text-xl">
                 The source code of all the projects can be found on {' '}
@@ -32,10 +31,14 @@ export function Header() {
               </p>
             </div>
             <div>
-              <p className="text-sm py-4 text-white">Currently on devnet only</p>
+              <p className="text-sm py-4 text-white">Wallet actions use Devnet</p>
+              <nav className="flex gap-4 text-white underline" aria-label="Examples">
+                <a href="/">Examples</a><a href="/oracle">Oracle</a>
+                <a href="/sendUsd">USD payment</a><a href="/arbitrage">Jupiter quotes</a>
+              </nav>
             </div>
             <div className="md:hidden block">
-              <WalletMultiButton style={{ backgroundColor: 'midnightblue' }} />
+              <WalletButton />
             </div>
           </div>
         </div>

@@ -1,3 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+@theme {
+  --color-background: white;
+  --color-primary: #191970;
+  --color-primary-foreground: white;
+  --color-ring: #191970;
+  --color-input: #d1d5db;
+  --color-card: white;
+  --color-card-foreground: #111827;
+  --color-muted-foreground: #6b7280;
+}

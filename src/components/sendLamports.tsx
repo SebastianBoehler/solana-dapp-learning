@@ -1,51 +1,35 @@
-import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Keypair, SystemProgram, Transaction, } from '@solana/web3.js';
-import React, { FC, useCallback } from 'react';
+import { address } from '@solana/kit';
+import { getTransferSolInstruction } from '@solana-program/system';
+import { useClient, useAction } from '@solana/react';
+import { useConnectedWallet } from '@solana/kit-plugin-wallet/react';
+import { useState } from 'react';
+import type { AppClient } from '@/lib/solana/client';
+import { parseUnits } from '@/lib/solana/amounts';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { TransactionStatus } from './transaction-status';
 
-export const SendSOLToRandomAddress: FC = () => {
-    const { connection } = useConnection();
-    const { publicKey, sendTransaction } = useWallet();
-
-    const onClick = useCallback(async () => {
-        if (!publicKey) throw new WalletNotConnectedError();
-
-        // 890880 lamports as of 2022-09-01
-        const lamports = await connection.getMinimumBalanceForRentExemption(0);
-
-        const transaction = new Transaction().add(
-            SystemProgram.transfer({
-                fromPubkey: publicKey,
-                toPubkey: Keypair.generate().publicKey,
-                lamports,
-            }),
-            SystemProgram.transfer({
-                fromPubkey: publicKey,
-                toPubkey: Keypair.generate().publicKey,
-                lamports,
-            }),
-        );
-
-        const {
-            context: { slot: minContextSlot },
-            value: { blockhash, lastValidBlockHeight }
-        } = await connection.getLatestBlockhashAndContext();
-
-        //signature equals transaction hash
-        const signature = await sendTransaction(transaction, connection, { minContextSlot });
-
-        const result = await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
-        console.log({ result, signature })
-
-        //get transaction hash
-        const signatureTransaction = await connection.getSignatureStatus(signature, { searchTransactionHistory: true });
-        console.log({ signatureTransaction })
-
-    }, [publicKey, sendTransaction, connection]);
-
-    return (
-        <button onClick={onClick} disabled={!publicKey}>
-            Send SOL to a random address!
-        </button>
-    );
-};
+export function SendSOL() {
+    const client = useClient<AppClient>();
+    const connected = useConnectedWallet(client);
+    const [recipient, setRecipient] = useState('');
+    const [amount, setAmount] = useState('');
+    const transaction = useAction(async (signal) => {
+        if (!connected?.signer) throw new Error('Connect a signing wallet first.');
+        const result = await client.sendTransaction([getTransferSolInstruction({
+            source: connected.signer, destination: address(recipient), amount: parseUnits(amount, 9),
+        })], { abortSignal: signal });
+        return result.context.signature;
+    });
+    return <section className="container px-8 py-12 mx-auto space-y-4">
+        <h2 className="text-3xl font-bold">Send Devnet SOL</h2>
+        <div className="max-w-lg space-y-2">
+            <label htmlFor="sol-recipient">Recipient address</label>
+            <Input id="sol-recipient" value={recipient} onChange={e => setRecipient(e.target.value)} />
+            <label htmlFor="sol-amount">Amount in SOL</label>
+            <Input id="sol-amount" inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} />
+            <Button disabled={!connected?.signer || !recipient || !amount || transaction.isRunning} onClick={() => { void transaction.dispatch(); }}>Send SOL</Button>
+        </div>
+        <TransactionStatus action={transaction} />
+    </section>;
+}

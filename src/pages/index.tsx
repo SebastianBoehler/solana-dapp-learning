@@ -1,7 +1,6 @@
 import React from 'react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { SendSOL } from '@/components/sendLamports';
 import { Counter } from '@/components/counter';
-import './style.css'
 import { PythSendUsd } from '@/components/pyth_send_usd';
 import { Header } from '@/components/header';
 import { Oracle } from '@/components/oracle';
@@ -10,6 +9,7 @@ const IndexPage: React.FC = () => {
     return (
         <div>
             <Header />
+            <SendSOL />
             <PythSendUsd />
             <Counter />
             <Oracle />

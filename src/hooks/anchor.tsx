@@ -1,35 +1,38 @@
-import config from '@/config'
-import { Address, AnchorProvider, Idl, Program } from '@project-serum/anchor'
-import { AnchorWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, Connection } from '@solana/web3.js'
-import { WalletNotConnectedError, } from '@solana/wallet-adapter-base';
+import {
+    AccountRole, getAddressEncoder, getProgramDerivedAddress,
+    getUtf8Encoder, type Address, type Instruction, type TransactionSigner,
+} from '@solana/kit';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 
-//create function that gets the programm
-export const getProgram = async (connection: Connection, wallet: AnchorWallet | undefined, programId: Address, idl: Idl) => {
-    if (!wallet) throw new WalletNotConnectedError();
-    const provider = new AnchorProvider(
-        connection,
-        wallet,
-        AnchorProvider.defaultOptions(),
-    )
-    const program = new Program(idl, programId, provider)
-    return program
+// Anchor instruction identifiers are the first eight bytes of SHA-256.
+export async function discriminator(namespace: 'global' | 'account', name: string) {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${namespace}:${name}`));
+    return new Uint8Array(digest).slice(0, 8);
 }
 
-export const getDataAccounts = async <T extends unknown>(connection: Connection, wallet: AnchorWallet | undefined, programId: Address, idl: Idl) => {
-    if (!wallet) return []
-    const program = await getProgram(connection, wallet, programId, idl)
-    const accs = await program.account.counter.all() as T[]
-    return accs
+export async function deriveAccount(programAddress: Address, seed: 'counter' | 'oracle', user: Address) {
+    const [pda] = await getProgramDerivedAddress({
+        programAddress,
+        seeds: [getUtf8Encoder().encode(seed), getAddressEncoder().encode(user)],
+    });
+    return pda;
 }
 
-export const fetchDataAccount = async <T extends unknown>(connection: Connection, wallet: AnchorWallet | undefined, programId: Address, pubKey: PublicKey, idl: Idl) => {
-    if (!wallet) return
-    const program = await getProgram(connection, wallet, programId, idl)
-    const acc = await program.account.counter.fetch(pubKey)
-        .catch((err) => {
-            console.log(err)
-            return null
-        })
-    return acc as T | null
+export async function programInstruction(
+    programAddress: Address, name: string, signer: TransactionSigner,
+    account: Address, args: Uint8Array = new Uint8Array(),
+    includeSystem = false,
+) {
+    const prefix = await discriminator('global', name);
+    const data = new Uint8Array(prefix.length + args.length);
+    data.set(prefix);
+    data.set(args, prefix.length);
+    return {
+        programAddress, data,
+        accounts: [
+            { address: signer.address, role: AccountRole.WRITABLE_SIGNER, signer },
+            { address: account, role: AccountRole.WRITABLE },
+            ...(includeSystem ? [{ address: SYSTEM_PROGRAM_ADDRESS, role: AccountRole.READONLY }] : []),
+        ],
+    };
 }
