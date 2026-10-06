@@ -1,0 +1,19 @@
+[package]
+name = "pyth-program"
+version = "0.2.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+default = []
+no-entrypoint = []
+cpi = ["no-entrypoint"]
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "=1.2.1"
+pyth-solana-receiver-sdk = "=2.0.0"

@@ -9,7 +9,7 @@ pub struct Counter {
 }
 
 #[derive(Accounts)]
-pub struct Initalize<'info> {
+pub struct Initialize<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
     #[account(
@@ -32,6 +32,7 @@ pub struct UpdateCounter<'info> {
 
 #[derive(Accounts)]
 pub struct CloseCounter<'info> {
+    #[account(mut)]
     user: Signer<'info>,
     #[account(
         mut,
@@ -46,24 +47,24 @@ pub struct CloseCounter<'info> {
 mod my_counter {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initalize>) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         ctx.accounts.set.count = 0;
-        msg!("Initalize account");
+        msg!("Initialize account");
         Ok(())
     }
 
     pub fn decrease_counter(ctx: Context<UpdateCounter>, number: u8) -> Result<()> {
-        require!(number > 10, MyError::MaxStepSize);
-        ctx.accounts.set.count -= number;
+        require!(number > 0 && number <= 4, MyError::MaxStepSize);
+        ctx.accounts.set.count = subtract(ctx.accounts.set.count, number)?;
         msg!("Decrease counter {}", number);
         Ok(())
     }
 
     pub fn increase_counter(ctx: Context<UpdateCounter>, number: u8) -> Result<()> {
-        if number >= 5 {
+        if number == 0 || number >= 5 {
             return err!(MyError::MaxStepSize);
         }
-        ctx.accounts.set.count += number;
+        ctx.accounts.set.count = add(ctx.accounts.set.count, number)?;
         msg!("Increased counter {}", number);
         Ok(())
     }
@@ -78,4 +79,30 @@ pub enum MyError {
     DataInputInvalid,
     #[msg("Max step size is too big")]
     MaxStepSize,
+    #[msg("Counter arithmetic exceeds the u8 range")]
+    OutOfRange,
+}
+
+fn add(count: u8, step: u8) -> Result<u8> {
+    count
+        .checked_add(step)
+        .ok_or_else(|| error!(MyError::OutOfRange))
+}
+
+fn subtract(count: u8, step: u8) -> Result<u8> {
+    count
+        .checked_sub(step)
+        .ok_or_else(|| error!(MyError::OutOfRange))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn arithmetic_rejects_wraparound() {
+        assert_eq!(add(0, 4).unwrap(), 4);
+        assert_eq!(subtract(4, 4).unwrap(), 0);
+        assert!(add(255, 1).is_err());
+        assert!(subtract(0, 1).is_err());
+    }
 }
